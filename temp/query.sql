@@ -1,3 +1,10 @@
+/*
+SQL server 2008 uyumlu !
+programming by Cuneyt YENER
+
+quanticvision.co.uk
+
+*/
 
 WITH LastPaymentCTE AS (
     SELECT
@@ -27,17 +34,19 @@ LastInvoiceCTE AS (
     GROUP BY SYYY
 ),
 LastInvoiceDetailCTE AS (
-    SELECT
-        IM.SYYY,
-        IM.INVOICE_NO,
-        OM.ORDER_NO,
-        CASE 
-            WHEN ISNUMERIC(IM.INVOICE_DATE1) = 1 THEN CONVERT(datetime, CONVERT(varchar(8), IM.INVOICE_DATE1))
-            ELSE NULL
-        END AS LastInvoiceFormatted,
-        ROW_NUMBER() OVER (PARTITION BY IM.SYYY ORDER BY IM.INVOICE_DATE1 DESC) AS rn
-    FROM dbo.INVOICE_MASTER IM
-    LEFT JOIN dbo.ORDER_MASTER OM ON IM.SYYY = OM.SYYY
+SELECT
+    IM.SYYY,
+    IM.INVOICE_NO,
+    OM.ORDER_NO,
+    CASE 
+        WHEN ISNUMERIC(IM.INVOICE_DATE1) = 1 THEN CONVERT(datetime, CONVERT(varchar(8), IM.INVOICE_DATE1))
+        ELSE NULL
+    END AS LastInvoiceFormatted,
+    ROW_NUMBER() OVER (PARTITION BY IM.SYYY ORDER BY IM.INVOICE_DATE1 DESC) AS rn
+FROM dbo.INVOICE_MASTER IM
+LEFT JOIN dbo.ORDER_MASTER OM
+    ON IM.SYYY = OM.SYYY AND OM.STATUS = 1
+WHERE IM.ITYPE = 1
 )
 SELECT
     LTRIM(RTRIM(s.SUP_NAME)) AS [Customer / Supplier],
@@ -57,14 +66,14 @@ SELECT
             CASE 
                 WHEN DATEDIFF(DAY, p.LastPaymentDate, GETDATE()) < 0 THEN 'Error'
                 WHEN DATEDIFF(DAY, p.LastPaymentDate, GETDATE()) < 30 THEN 
-                    CONVERT(varchar(10), DATEDIFF(DAY, p.LastPaymentDate, GETDATE())) + ' gün'
+                    CONVERT(varchar(10), DATEDIFF(DAY, p.LastPaymentDate, GETDATE())) + ' g�n'
                 ELSE 
                     CASE 
                         WHEN (DATEDIFF(DAY, p.LastPaymentDate, GETDATE()) % 30) = 0 THEN
                             CONVERT(varchar(10), (DATEDIFF(DAY, p.LastPaymentDate, GETDATE()) / 30)) + ' Ay'
                         ELSE
                             CONVERT(varchar(10), (DATEDIFF(DAY, p.LastPaymentDate, GETDATE()) / 30)) + ' Ay ' +
-                            CONVERT(varchar(10), (DATEDIFF(DAY, p.LastPaymentDate, GETDATE()) % 30)) + ' gün'
+                            CONVERT(varchar(10), (DATEDIFF(DAY, p.LastPaymentDate, GETDATE()) % 30)) + ' g�n'
                     END
             END
     END AS [GecenZaman1],
@@ -88,14 +97,14 @@ SELECT
             CASE 
                 WHEN DATEDIFF(DAY, li.LastInvoiceDate, GETDATE()) < 0 THEN 'Error'
                 WHEN DATEDIFF(DAY, li.LastInvoiceDate, GETDATE()) < 30 THEN 
-                    CONVERT(varchar(10), DATEDIFF(DAY, li.LastInvoiceDate, GETDATE())) + ' gün'
+                    CONVERT(varchar(10), DATEDIFF(DAY, li.LastInvoiceDate, GETDATE())) + ' g�n'
                 ELSE 
                     CASE 
                         WHEN (DATEDIFF(DAY, li.LastInvoiceDate, GETDATE()) % 30) = 0 THEN
                             CONVERT(varchar(10), (DATEDIFF(DAY, li.LastInvoiceDate, GETDATE()) / 30)) + ' Ay'
                         ELSE
                             CONVERT(varchar(10), (DATEDIFF(DAY, li.LastInvoiceDate, GETDATE()) / 30)) + ' Ay ' +
-                            CONVERT(varchar(10), (DATEDIFF(DAY, li.LastInvoiceDate, GETDATE()) % 30)) + ' gün'
+                            CONVERT(varchar(10), (DATEDIFF(DAY, li.LastInvoiceDate, GETDATE()) % 30)) + ' g�n'
                     END
             END
     END AS [GecenZaman2],
@@ -121,6 +130,11 @@ LEFT JOIN LastInvoiceCTE li ON s.YYY = li.SYYY
 LEFT JOIN LastInvoiceDetailCTE ld ON s.YYY = ld.SYYY AND ld.rn = 1
 WHERE s.ACCOUNT_TYPE = 0
 AND s.SUP_NAME LIKE '%%'
+
+-- 1 = 0 sadece balance'i olanlar
+-- 0 = 0 tum musteriler balance olan olmayan! (eksi balance olanlar, sifir degerinden sonra basta gelir! )
+-- ilk deger ? python icin paramdir!
+
 AND (? = 0 OR (ISNULL(fin.TotalDebit, 0) - ISNULL(fin.TotalCredit, 0))  > 0)
 
 ORDER BY 
