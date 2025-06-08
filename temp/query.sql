@@ -30,23 +30,29 @@ LastInvoiceCTE AS (
                 ELSE NULL
             END
         ) AS LastInvoiceDate
-    FROM dbo.INVOICE_MASTER
+    FROM dbo.INVOICE_MASTER 	where ITYPE = 1
     GROUP BY SYYY
 ),
 LastInvoiceDetailCTE AS (
+
 SELECT
     IM.SYYY,
     IM.INVOICE_NO,
-    OM.ORDER_NO,
+    IM.MASTERNO,
+	OM.ORDER_NO,
+
     CASE 
         WHEN ISNUMERIC(IM.INVOICE_DATE1) = 1 THEN CONVERT(datetime, CONVERT(varchar(8), IM.INVOICE_DATE1))
         ELSE NULL
     END AS LastInvoiceFormatted,
     ROW_NUMBER() OVER (PARTITION BY IM.SYYY ORDER BY IM.INVOICE_DATE1 DESC) AS rn
+
+    
 FROM dbo.INVOICE_MASTER IM
-LEFT JOIN dbo.ORDER_MASTER OM
-    ON IM.SYYY = OM.SYYY AND OM.STATUS = 1
-WHERE IM.ITYPE = 1
+JOIN ORDER_DISPATCH_INVOICE_LINK OL ON OL.IMASTERNO = IM.MASTERNO
+JOIN ORDER_MASTER OM ON OL.OMASTERNO = OM.MASTERNO
+
+
 )
 SELECT
     LTRIM(RTRIM(s.SUP_NAME)) AS [Customer / Supplier],
@@ -66,14 +72,14 @@ SELECT
             CASE 
                 WHEN DATEDIFF(DAY, p.LastPaymentDate, GETDATE()) < 0 THEN 'Error'
                 WHEN DATEDIFF(DAY, p.LastPaymentDate, GETDATE()) < 30 THEN 
-                    CONVERT(varchar(10), DATEDIFF(DAY, p.LastPaymentDate, GETDATE())) + ' g�n'
+                    CONVERT(varchar(10), DATEDIFF(DAY, p.LastPaymentDate, GETDATE())) + ' gün'
                 ELSE 
                     CASE 
                         WHEN (DATEDIFF(DAY, p.LastPaymentDate, GETDATE()) % 30) = 0 THEN
                             CONVERT(varchar(10), (DATEDIFF(DAY, p.LastPaymentDate, GETDATE()) / 30)) + ' Ay'
                         ELSE
                             CONVERT(varchar(10), (DATEDIFF(DAY, p.LastPaymentDate, GETDATE()) / 30)) + ' Ay ' +
-                            CONVERT(varchar(10), (DATEDIFF(DAY, p.LastPaymentDate, GETDATE()) % 30)) + ' g�n'
+                            CONVERT(varchar(10), (DATEDIFF(DAY, p.LastPaymentDate, GETDATE()) % 30)) + ' gün'
                     END
             END
     END AS [GecenZaman1],
@@ -97,25 +103,30 @@ SELECT
             CASE 
                 WHEN DATEDIFF(DAY, li.LastInvoiceDate, GETDATE()) < 0 THEN 'Error'
                 WHEN DATEDIFF(DAY, li.LastInvoiceDate, GETDATE()) < 30 THEN 
-                    CONVERT(varchar(10), DATEDIFF(DAY, li.LastInvoiceDate, GETDATE())) + ' g�n'
+                    CONVERT(varchar(10), DATEDIFF(DAY, li.LastInvoiceDate, GETDATE())) + ' gün'
                 ELSE 
                     CASE 
                         WHEN (DATEDIFF(DAY, li.LastInvoiceDate, GETDATE()) % 30) = 0 THEN
                             CONVERT(varchar(10), (DATEDIFF(DAY, li.LastInvoiceDate, GETDATE()) / 30)) + ' Ay'
                         ELSE
                             CONVERT(varchar(10), (DATEDIFF(DAY, li.LastInvoiceDate, GETDATE()) / 30)) + ' Ay ' +
-                            CONVERT(varchar(10), (DATEDIFF(DAY, li.LastInvoiceDate, GETDATE()) % 30)) + ' g�n'
+                            CONVERT(varchar(10), (DATEDIFF(DAY, li.LastInvoiceDate, GETDATE()) % 30)) + ' gun'
                     END
             END
     END AS [GecenZaman2],
-    LTRIM(RTRIM(ld.INVOICE_NO)) AS [Last Invoice No],
-    LTRIM(RTRIM(ld.ORDER_NO)) AS [Order No],
+    LTRIM(RTRIM(ld.INVOICE_NO)) AS [Last Invoice No]
+
+	,
+
+	LTRIM(RTRIM(ld.ORDER_NO)) AS [Order No],
     CASE 
         WHEN LEFT(LTRIM(RTRIM(ld.ORDER_NO)), 3) = 'A01' THEN 'Hasan'
         WHEN LEFT(LTRIM(RTRIM(ld.ORDER_NO)), 3) = 'A02' THEN 'Murat'
         WHEN LEFT(LTRIM(RTRIM(ld.ORDER_NO)), 3) = 'A03' THEN 'Eren-Halil'
         ELSE 'OFIS'
     END AS [Sales Representative]
+
+
 FROM dbo.SUPPLIER s
 LEFT JOIN (
     SELECT 
