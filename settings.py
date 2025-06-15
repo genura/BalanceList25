@@ -1,10 +1,13 @@
 # settings.py
 
 user_mapping = {
-    'A02': 'Murat',
     'A01': 'Hasan',
-    'A03': 'Eren - Halil',
+    'A02': 'Murat',     
+    'A03': 'Eren',
+    'A04': 'Serdar',    
+    'HA-': 'HALIL',
     'SO-': 'OFIS' 
+    
 }
 
 database_name = 'HALIL'
