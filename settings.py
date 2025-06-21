@@ -10,6 +10,6 @@ user_mapping = {
     
 }
 
-database_name = 'HALIL'
-server_name = 'SOLARAPEX\\SQLEXPRESS'  # veya IP adresi gibi bir şey: '192.168.1.100'
+database_name = 'PERLA'
+server_name = 'SOLARAPEX'  # veya IP adresi gibi bir şey: '192.168.1.100'
 excel_output_folder = 'C:/Users/Cuneyt/Desktop'

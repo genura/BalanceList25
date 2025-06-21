@@ -3,6 +3,7 @@
 This console application uses `curses` along with `npyscreen` for interactive dialogs.
 
 ## Setup
+
 Install requirements manually using the commands listed in `redistro.txt`:
 
 ```bash
@@ -14,5 +15,18 @@ pip install npyscreen
 ```
 
 ## Usage
+
 Run `python main.py` from a terminal. Dialogs for confirmations are now presented
 via pop-up boxes instead of keyboard prompts.
+
+```bash
+temp/query.sql
+ve
+./settings.py
+
+dosyalarinda saplesrep tanimlamalari ikiside ayni!
+python icin settings gecerli!
+sql dosyasi tanimlamasi ise, herhangi bi yerde queryi calistirirken sorunsuz calissin diye !
+
+caktin mi ?
+```
