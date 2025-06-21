@@ -122,7 +122,9 @@ SELECT
     CASE 
         WHEN LEFT(LTRIM(RTRIM(ld.ORDER_NO)), 3) = 'A01' THEN 'Hasan'
         WHEN LEFT(LTRIM(RTRIM(ld.ORDER_NO)), 3) = 'A02' THEN 'Murat'
-        WHEN LEFT(LTRIM(RTRIM(ld.ORDER_NO)), 3) = 'A03' THEN 'Eren-Halil'
+        WHEN LEFT(LTRIM(RTRIM(ld.ORDER_NO)), 3) = 'A03' THEN 'Eren'
+		WHEN LEFT(LTRIM(RTRIM(ld.ORDER_NO)), 3) = 'A04' THEN 'Serdar'
+		WHEN LEFT(LTRIM(RTRIM(ld.ORDER_NO)), 3) = 'HA-' THEN 'HALIL'		
         ELSE 'OFIS'
     END AS [Sales Representative]
 
