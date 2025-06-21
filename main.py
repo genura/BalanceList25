@@ -14,6 +14,7 @@ import pyodbc
 import json
 import shutil
 import threading
+import npyscreen
 from datetime import datetime
 from decimal import Decimal
 from copy import copy
@@ -51,6 +52,16 @@ def write_temp_file(filename, content):
             f.write(content)
     except:
         pass
+
+
+def confirm_box(message):
+    """Display a yes/no dialog and return True if the user selects yes."""
+    return npyscreen.notify_yes_no(message)
+
+
+def info_box(message):
+    """Display an informational dialog."""
+    npyscreen.notify_confirm(message)
 
 
 # Ana menüye PDF dönüştürme seçeneği eklemek isterseniz:
@@ -310,47 +321,17 @@ def main(stdscr):
         elif key == curses.KEY_ENTER or key in [10, 13]:
             if current_row == 0:
                 stdscr.clear()
-                filter_text = "Sadece Balance > 0 olanlari gormek istiyor musunuz? (E/H)"
-                safe_addstr(stdscr, h // 2, w // 2 - len(filter_text) // 2, filter_text)
-                stdscr.refresh()
-
-
-                filter_answer = stdscr.getch()
-
-                if filter_answer in [ord('e'), ord('E'), 10, 13]:
-                    selected = 'E'
-                elif filter_answer in [ord('h'), ord('H'), 27]:
-                    selected = 'H'
-                else:
-                    selected = 'H'
-
-                if selected == 'E':
-                    show_positive_only_value = 1
-                else:
-                    show_positive_only_value = 0
-
+                show_positive_only_value = 1 if confirm_box(
+                    "Sadece Balance > 0 olanlari gormek istiyor musunuz?") else 0
 
                 if show_positive_only_value == 1:
                     write_temp_file(EXCEL_TYPE_PATH, "STD BALANCE LIST")
                 else:
                     write_temp_file(EXCEL_TYPE_PATH, "TUM LISTE")
 
-
                 stdscr.clear()
-                confirm_text = "SQL sorgusu calistirilacak. Devam etmek istiyor musunuz? (E/H)"
-                safe_addstr(stdscr, h // 2, w // 2 - len(confirm_text) // 2, confirm_text)
-                stdscr.refresh()
-                
-                answer = stdscr.getch()
-
-                if answer in [ord('e'), ord('E'), 10, 13]:
-                    selected = 'E'
-                elif answer in [ord('h'), ord('H'), 27]:
-                    selected = 'H'
-                else:
-                    selected = 'H'
-
-                if selected != 'E':
+                if not confirm_box(
+                        "SQL sorgusu calistirilacak. Devam etmek istiyor musunuz?"):
                     continue
 
 
@@ -381,27 +362,12 @@ def main(stdscr):
                         raise NameError
                 except NameError:
                     stdscr.clear()
-                    error_text = "Once SQL sorgusu calistirmalisiniz!"
-                    safe_addstr(stdscr, h // 2, w // 2 - len(error_text) // 2, error_text)
-                    stdscr.refresh()
-                    stdscr.getch()
+                    info_box("Once SQL sorgusu calistirmalisiniz!")
                     continue
 
                 stdscr.clear()
-                confirm_text = "Excel dosyasina yazilacak. Devam etmek istiyor musunuz? (E/H)"
-                safe_addstr(stdscr, h // 2, w // 2 - len(confirm_text) // 2, confirm_text)
-                stdscr.refresh()
-
-                answer = stdscr.getch()
-
-                if answer in [ord('e'), ord('E'), 10, 13]:
-                    selected = 'E'
-                elif answer in [ord('h'), ord('H'), 27]:
-                    selected = 'H'
-                else:
-                    selected = 'H'
-
-                if selected != 'E':
+                if not confirm_box(
+                        "Excel dosyasina yazilacak. Devam etmek istiyor musunuz?"):
                     continue
 
 
@@ -435,20 +401,7 @@ def main(stdscr):
                 convert_last_excel_to_pdf(stdscr)                
             elif current_row == 3:
                 stdscr.clear()
-                confirm_text = "Cikmak istiyor musunuz? (E/H)"
-                safe_addstr(stdscr, h // 2, w // 2 - len(confirm_text) // 2, confirm_text)
-                stdscr.refresh()
-
-                answer = stdscr.getch()
-
-                if answer in [ord('e'), ord('E'), 10, 13]:
-                    selected = 'E'
-                elif answer in [ord('h'), ord('H'), 27]:
-                    selected = 'H'
-                else:
-                    selected = 'H'
-
-                if selected != 'E':
+                if not confirm_box("Cikmak istiyor musunuz?"):
                     continue
 
 

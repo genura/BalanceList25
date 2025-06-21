@@ -2,7 +2,4 @@ pip install pyodbc
 pip install openpyxl
 pip install pywin32
 pip install windows-curses
-
-
-
-settings icini degistir
+pip install npyscreen
